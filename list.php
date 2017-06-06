@@ -25,7 +25,7 @@ try{
 $result = mysql_query($sql,$connect);
 
 $rows = array();
-while($row = mysql_fetch_assoc($result)) {
+while($row = mysql_fetch_assoc($result)) {  // mysql_fetch_array 
 	$rows[] = $row;
 }
 
