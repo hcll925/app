@@ -14,7 +14,7 @@ class File {
 	*	@param string $path 路径
 	*/
 	public function cacheData($key,$value='',$cacheTime=0) {
-		$filename = $this->_dir.$key.self::EXT;
+		$filename = $this->_dir . $key . self::EXT;
 
 		// 当值不为空的时候  写入缓存
 		if($value !== '') {   // 将value值写入缓存
@@ -28,7 +28,7 @@ class File {
 
 			$cacheTime = sprintf('%011d',$cacheTime); // 设置 11 为数 不够补 0
 			// file_put_contents  向文件写入数据  数据只能为 string
-			return file_put_contents($filename, $cacheTime.json_encode($value));
+			return file_put_contents($filename, $cacheTime . json_encode($value));
 		}
 
 		// 当不传 value 值得时候 读取缓存
@@ -40,7 +40,7 @@ class File {
 		$value = substr($contents,11);
 		// 设置缓存失效时间 当缓存时间+文件时间 < 当前时间 说明缓存失效 删除缓存文件
 		// 缓存时间为 0 的时候 为永久生效
-		if($cacheTime != 0 && $cacheTime + filemtime($filename) < time()) { // filemtime  文件上次修改时间 返回时间戳
+		if($cacheTime != 0 && ($cacheTime + filemtime($filename) < time())) { // filemtime  文件上次修改时间 返回时间戳
 			unlink($filename);
 			return FALSE;
 		}
@@ -50,6 +50,3 @@ class File {
 }
 
 
-$file = new File();
-
-echo $file -> cacheData('test1');

@@ -2,6 +2,7 @@
 
 require_once('./response.php');
 require_once('./db.php');
+require_once('./file.php');
 
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $pageSize = isset($_GET['pagesize']) ? $_GET['pagesize'] :3;
@@ -15,19 +16,30 @@ $offset = ($page-1)*$pageSize;
 
 $sql = "select * from item limit ".$offset.",".$pageSize;
 
-// 数据库连接错误 异常处理
-try{
-	$connect = DB::getInstance() -> connect();
-}catch(Exception $e) {
-	return Response::show(403,'数据库连接失败');
+$cache = new File();
+$rows = array(); // 存储数据
+
+// 如果缓存不存在
+if(!$rows = $cache->cacheData('index_cache'. $page.'-'. $pageSize)) {
+	// 从数据库提取数据
+	// 数据库连接错误 异常处理
+	try{
+		$connect = DB::getInstance() -> connect();
+	}catch(Exception $e) {
+		return Response::show(403,'数据库连接失败');
+	}
+	$result = mysql_query($sql,$connect);
+
+	while($row = mysql_fetch_assoc($result)) {  // mysql_fetch_array 
+		$rows[] = $row;
+	}
+
+	// 数据提取成功 写入缓存
+	if($rows) {
+		$cache->cacheData('index_cache'.$page.'-'.$pageSize,$rows,10);
+	}
 }
 
-$result = mysql_query($sql,$connect);
-
-$rows = array();
-while($row = mysql_fetch_assoc($result)) {  // mysql_fetch_array 
-	$rows[] = $row;
-}
 
 if($rows) {
 	return Response::show(200,'数据获取成功',$rows);
